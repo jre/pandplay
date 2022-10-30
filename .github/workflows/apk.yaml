@@ -9,10 +9,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Set up JDK
+        uses: actions/setup/java@v3
+        with:
+          distribution: zulu
+          java-version: 17
+          cache: gradle
       - name: Build app
-        run: ./gradlew build
-      - name: Archive artifacts
+        run: ./gradlew assembleRelease assembleDebug
+      - name: Archive release artifact
         uses: actions/upload-artifact@v3
         with:
-          name: app
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: pandplay-debug
+          path: app/build/outputs/apk/debug/pandplay-debug.apk
+      - name: Archive debug artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pandplay-release-unsigned
+          path: app/build/outputs/apk/release/pandplay-release-unsigned.apk
