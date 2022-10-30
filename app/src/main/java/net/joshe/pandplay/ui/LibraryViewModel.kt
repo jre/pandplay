@@ -125,8 +125,7 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
 
     fun reloadStations() {
         viewModelScope.launch {
-            val stations = repo.maybeReloadStations(getApplication())
-            if (stations != null) {
+            repo.maybeReloadStations(getApplication())?.let { stations ->
                 currentStation = loadCurrentStation(stations)
                 _stationsChanged.postValue(stations)
             }
