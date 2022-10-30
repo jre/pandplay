@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/mobile_navigation"
+            app:startDestination="@+id/navigation_player">
+
+    <fragment
+            android:id="@+id/navigation_player"
+            android:name="net.joshe.pandplay.ui.PlayerFragment"
+            android:label="@string/title_player"
+            tools:layout="@layout/fragment_player">
+        <action android:id="@+id/action_navigation_player_to_navigation_prefs_main"
+                app:destination="@id/navigation_prefs_main"/>
+    </fragment>
+
+    <fragment
+            android:id="@+id/navigation_playlist"
+            android:name="net.joshe.pandplay.ui.PlaylistFragment"
+            android:label="@string/title_playlist"
+            tools:layout="@layout/fragment_playlist">
+        <action android:id="@+id/action_navigation_playlist_to_navigation_prefs_main"
+                app:destination="@id/navigation_prefs_main"/>
+    </fragment>
+
+    <fragment
+            android:id="@+id/navigation_prefs_main"
+            android:name="net.joshe.pandplay.ui.PrefsMainFragment">
+        <action android:id="@+id/action_navigation_prefs_main_to_navigation_prefs_download"
+                app:destination="@id/navigation_prefs_download"/>
+        <action android:id="@+id/action_navigation_prefs_main_to_navigation_prefs_login"
+                app:destination="@id/navigation_prefs_login"/>
+    </fragment>
+
+    <fragment
+            android:id="@+id/navigation_prefs_login"
+            android:name="net.joshe.pandplay.ui.PrefsLoginFragment"/>
+
+    <fragment
+            android:id="@+id/navigation_prefs_download"
+            android:name="net.joshe.pandplay.ui.PrefsDownloadFragment"/>
+</navigation>

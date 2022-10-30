@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menuaction_syncStations"
+          android:title="@string/action_syncStations"
+          android:icon="@drawable/ic_baseline_sync_24"
+          app:showAsAction="never"/>
+    <item android:id="@+id/menuaction_downloadSongs"
+          android:title="@string/action_downloadSongs"
+          android:icon="@drawable/ic_outline_cloud_download_24"
+          app:showAsAction="never"/>
+    <item android:title="@string/title_configure"
+          android:icon="@drawable/ic_baseline_settings_24"
+          app:showAsAction="never"
+          android:id="@+id/navigation_prefs_main"/>
+    <item android:title="@string/title_stations"
+          android:id="@+id/submenu_stations"
+          app:showAsAction="always"
+          android:icon="@drawable/ic_outline_library_music_24">
+        <menu/>
+    </item>
+</menu>
