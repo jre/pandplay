@@ -18,7 +18,7 @@ jobs:
       - name: Build app
         run: ./gradlew assembleDebug
       - name: Archive release artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pandplay-debug
           path: app/build/outputs/apk/debug/pandplay-debug.apk
