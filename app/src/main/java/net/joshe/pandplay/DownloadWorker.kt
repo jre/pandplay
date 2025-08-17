@@ -25,7 +25,7 @@ fun downloadSongsNow(context: Context) {
     if (!haveChan)
         haveChan = createNotificationChannel(context, CHANNEL_ID_DOWNLOAD,
             R.string.channel_download_name, R.string.channel_download_description)
-    Log.v("WORKER", "starting worker to download songs now")
+    Log.v("WORKER", "starting immediate download worker")
     val req = OneTimeWorkRequestBuilder<DownloadWorker>()
         .setInputData(workDataOf(inputDataManual to true))
         .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
@@ -49,7 +49,7 @@ fun downloadSongsPeriodically(context: Context) {
     val freqCount = PrefKey.DL_FREQ_COUNT.getLongWithDefault(context)
     val freqUnit = PrefKey.DL_FREQ_UNIT.getAnyWithDefault(context) as DownloadFreqUnit
     val intervalMins = freqUnit.frequencyToIntervalMinutes(freqCount)
-    Log.v("WORKER", "scheduling worker to download songs ${freqCount}/${freqUnit} or every ${intervalMins} minutes")
+    Log.v("WORKER", "scheduling periodic download worker for ${freqCount}/${freqUnit} or every ${intervalMins} minutes")
     val req = PeriodicWorkRequestBuilder<DownloadWorker>(intervalMins, TimeUnit.MINUTES)
         .setInputData(workDataOf(inputDataManual to false))
         .setConstraints(constraints.build())
@@ -64,7 +64,7 @@ class DownloadWorker(context: Context, params: WorkerParameters): CoroutineWorke
     private var progressCurrent = 0
 
     init {
-        Log.v("WORKER", "initializing worker")
+        Log.v("WORKER", "initializing download worker")
     }
 
     override suspend fun doWork(): Result {
@@ -74,13 +74,13 @@ class DownloadWorker(context: Context, params: WorkerParameters): CoroutineWorke
         val totalMB = PrefKey.DL_SPACE_MB.getLongWithDefault(applicationContext)
         val stations = repo.loadStations().filter { stationIdSet?.contains(it.stationId)?:false }
         if (stations.isEmpty() || songCount <= 0 || totalMB / stations.size <= 1) {
-            Log.v("WORKER", "nothing to do ${stations.isEmpty()} ${songCount} ${if (stations.isNotEmpty()) totalMB / stations.size else null}")
+            Log.v("WORKER", "no download work to do ${stations.isEmpty()} ${songCount} ${if (stations.isNotEmpty()) totalMB / stations.size else null}")
             return Result.success()
         }
 
         return withContext(Dispatchers.IO) {
             if (!isImmediate && !shouldPeriodicWorkRun()) {
-                Log.v("WORKER", "not running periodic work now")
+                Log.v("WORKER", "not running periodic download work now")
                 return@withContext Result.success()
             }
             Log.v("WORKER", "starting ${if (isImmediate) "immediate" else "periodic"} download of ${songCount} songs each for stations ${stationIdSet?.joinToString(",")} with max total size ${totalMB} MB")
@@ -91,7 +91,7 @@ class DownloadWorker(context: Context, params: WorkerParameters): CoroutineWorke
             notify()
             val (loginSucceeded, loginMsg) =  repo.serviceLogin(applicationContext)
             if (!loginSucceeded) {
-                Log.v("WORKER", "failed to log in: ${loginMsg}")
+                Log.v("WORKER", "download worker failed to log in: ${loginMsg}")
                 return@withContext Result.failure()
             }
             for (st in stations)
@@ -151,7 +151,7 @@ class DownloadWorker(context: Context, params: WorkerParameters): CoroutineWorke
                     .addStates(listOf(WorkInfo.State.RUNNING))
                     .build()).get()
         }
-        Log.v("WORKER", "found ${immediateRunning.size} immediate work jobs running")
+        Log.v("WORKER", "found ${immediateRunning.size} immediate download work jobs running")
         if (immediateRunning.isNotEmpty()) {
             return false
         }
@@ -162,7 +162,7 @@ class DownloadWorker(context: Context, params: WorkerParameters): CoroutineWorke
         val freqUnit = PrefKey.DL_FREQ_UNIT.getAnyWithDefault(applicationContext) as DownloadFreqUnit
         val intervalSecs = freqUnit.frequencyToIntervalMinutes(freqCount) * 60
 
-        Log.v("WORKER", "last periodic work was ${(curSecs-lastWorkSecs)/60} minutes ago, last=${lastWorkSecs} cur=${curSecs} interval=${intervalSecs}(${intervalSecs/60} mins)")
+        Log.v("WORKER", "last periodic download work was ${(curSecs-lastWorkSecs)/60} minutes ago, last=${lastWorkSecs} cur=${curSecs} interval=${intervalSecs}(${intervalSecs/60} mins)")
         if (lastWorkSecs + intervalSecs > curSecs)
             return false
         PrefKey.WORK_LAST_PERIODIC.saveAny(applicationContext, curSecs)
@@ -203,7 +203,7 @@ class DownloadWorker(context: Context, params: WorkerParameters): CoroutineWorke
             // XXX can I check for a permission here? maybe only on S(?) or newer?
             setForeground(getForegroundInfo())
         } catch (e: Throwable) {
-            Log.v("WORKER", "failed to set foreground info: ${e}")
+            Log.v("WORKER", "download worker failed to set foreground info: ${e}")
         }
     }
 
