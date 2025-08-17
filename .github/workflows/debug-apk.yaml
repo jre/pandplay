@@ -1,10 +1,10 @@
-name: Build
+name: Build debug APK
 on:
   push:
     branches:
       - main
 jobs:
-  apk:
+  debug-apk:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -17,7 +17,7 @@ jobs:
           cache: gradle
       - name: Build app
         run: ./gradlew assembleDebug
-      - name: Archive release artifact
+      - name: Archive apk artifact
         uses: actions/upload-artifact@v4
         with:
           name: pandplay-debug
