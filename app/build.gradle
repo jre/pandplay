@@ -32,10 +32,10 @@ android {
 
     signingConfigs {
         release {
-            storeFile file(System.getenv("RELEASE_KEYSTORE_PATH"))
-            storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD")
-            keyPassword System.getenv("RELEASE_KEY_PASSWORD")
-            keyAlias System.getenv("RELEASE_KEY_ALIAS")
+            storeFile file(System.getenv("RELEASE_KEYSTORE_PATH") ?: "/dev/null")
+            storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD") ?: ""
+            keyPassword System.getenv("RELEASE_KEY_PASSWORD") ?: ""
+            keyAlias System.getenv("RELEASE_KEY_ALIAS") ?: ""
         }
     }
     buildTypes {
@@ -43,7 +43,8 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
+            if (signingConfigs.release.keyAlias)
+                signingConfig signingConfigs.release
         }
     }
 }
