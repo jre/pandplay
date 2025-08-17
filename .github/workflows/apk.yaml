@@ -16,14 +16,9 @@ jobs:
           java-version: 17
           cache: gradle
       - name: Build app
-        run: ./gradlew assembleRelease assembleDebug
+        run: ./gradlew assembleDebug
       - name: Archive release artifact
         uses: actions/upload-artifact@v3
         with:
           name: pandplay-debug
           path: app/build/outputs/apk/debug/pandplay-debug.apk
-      - name: Archive debug artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: pandplay-release-unsigned
-          path: app/build/outputs/apk/release/pandplay-release-unsigned.apk
