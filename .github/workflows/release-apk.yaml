@@ -1,6 +1,6 @@
 name: Build release APK
 on:
-  release
+  release:
     types: [created]
 jobs:
   release-apk:
