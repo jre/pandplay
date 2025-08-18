@@ -1,7 +1,8 @@
-name: Build release APK
+name: Release signed APK
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - 'v[0-9]+.*'
 jobs:
   release-apk:
     runs-on: ubuntu-latest
@@ -28,6 +29,12 @@ jobs:
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
         run: ./gradlew assembleRelease
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" --generate-notes
       - name: Upload apk artifact
         env:
           GITHUB_TOKEN: ${{ github.token }}
