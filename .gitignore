@@ -3,6 +3,7 @@
 **/build/
 xcuserdata
 !src/**/build/
+/keystore.properties
 /local.properties
 /.idea
 .DS_Store

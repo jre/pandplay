@@ -17,11 +17,14 @@ jobs:
           distribution: zulu
           java-version: 17
           cache: gradle
-      - name: Retrieve keystore
+      - name: Set up keystore
         env:
-          RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
         run: |
-          echo "${RELEASE_KEYSTORE_BASE64}" | base64 -di > keystore.jks
+          ./.github/writeks.sh
       - name: Build app
         env:
           RELEASE_KEYSTORE_PATH: ${{ github.workspace }}/keystore.jks

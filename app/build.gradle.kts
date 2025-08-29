@@ -1,5 +1,13 @@
+import java.io.FileInputStream
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+val keystoreProps = Properties()
+rootProject.file("keystore.properties").let { ks ->
+    if (ks.canRead())
+        keystoreProps.load(FileInputStream(ks))
+}
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
@@ -86,22 +94,26 @@ android {
         }
     }
     signingConfigs {
-        register("release") {
-            storeFile = System.getenv("RELEASE_KEYSTORE_PATH")?.let {file(it)}
-            storePassword = System.getenv("RELEASE_KEYSTORE_PASSWORD")
-            keyPassword = System.getenv("RELEASE_KEY_PASSWORD")
-            keyAlias = System.getenv("RELEASE_KEY_ALIAS")
+        register("config") {
+            storeFile = keystoreProps.getProperty("storeFile")?.let {file(it)}
+            storePassword = keystoreProps.getProperty("storePassword")
+            keyPassword = keystoreProps.getProperty("keyPassword")
+            keyAlias = keystoreProps.getProperty("keyAlias")
         }
     }
     buildTypes {
+        getByName("debug") {
+            if (signingConfigs["config"].storeFile != null)
+                signingConfig = signingConfigs["config"]
+        }
         getByName("release") {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro")
-            if (signingConfigs["release"].storeFile != null)
-                signingConfig = signingConfigs["release"]
+            if (signingConfigs["config"].storeFile != null)
+                signingConfig = signingConfigs["config"]
         }
     }
     compileOptions {
