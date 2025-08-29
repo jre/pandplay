@@ -1,0 +1,159 @@
+test update with both controller apps on min and max api versions
+read media3 session demo app
+handle timeouts, http errors and api errors gracefully
+handle sql errors gracefully
+ensure I'm using audio offload when available
+check if glide is properly caching scaled album images
+can I securely store the api password somehow?
+
+do the media session bits have debug logging I can enable?
+  sometimes weird unreproducable things happen and logcat is useless
+  maybe player.addAnalyticsListener ?
+
+adapt release builds to use a properties file instead of environment vars
+  https://developer.android.com/studio/publish/app-signing#secure_key
+  sign all builds so I can easily switch between release and dev
+
+rework sqlite with future DBs in mind
+  use an abstract dao to eliminate local room datasource
+    create separate daos for each data type
+
+track extra song metadata via a room
+  store all metadata needed for future features
+  save station info locally after being deleted remotely
+    get extended station info so stations can be recreated
+
+polish initial flow:
+  rewrite preferences in compose
+  walk through setting login info and successfully logging in,
+  then load station list and select stations to download,
+  then set criteria for downloading stations, offer option to download now
+
+handle api login errors
+  add an invisible preference flag indicating login info is valid
+  if login info isn't valid, show login preferences
+    pre-fill any existing login info
+  don't attempt to contact api if login info invalid
+    show a message if network request was something interactive
+    post notification for automatic network requests
+    maybe disable ui controls for synchronous api calls
+      do this if network is unavailable too
+
+tweak settings
+  change actionbar title
+  hide bottom bar
+  make signin button look a little more like a button
+  option to not display a media notification (and not play in background)
+  option to autoplay
+  option to disable auto-pause on output disconnect
+  option to show password?
+  show size quota as a percentage of available space
+    alternately specify it as the number of songs, total
+
+scheduled background downloads
+  musicdb maintenance
+    drop music from db if music file missing
+    remove art and music files not referenced in db
+    download album art mentioned in db but not found locally
+    remove unreferenced album and artist db entries
+    
+  scan for orphaned art and media files after download
+  also for orphaned album and song entries in the db
+  or maybe 
+  manual download should cancel itself if a periodic download is running
+maybe use cache storage for replaceable data like album art?
+  this probably doesn't make sense anymore with tagging gone
+  need to be able to re-download them regardless
+    maybe when downloading new songs, scan for missing art and orphaned music files?
+      need to detect missing music files too
+
+better playlist randomization
+  chose a window size
+    maybe 1/3 or 1/4 of the station's songs
+    use a minimum size when selecting songs for the case where only a few songs are downloaded
+    also use a maximum size so that newly-downloaded songs show up soon
+  when the current song is 2/3 of the way through the window, discard the first 1/3 of the playlist
+  when the playlist length is less than the window:
+    sort station's songs by last played date (never played sorts before all played songs)
+      remove songs that are in the current playlist, if any
+    select enough songs from the beginning of the sorted list to increase playlist size to window size
+    randomize the selected songs and append to playlist
+  need to handle very small song lists too
+  remember playlist, current song and position after destroying mediasession
+
+use station checksum to refresh stations automatically whenever downloading songs
+  do this implicitly when validating login info, but don't otherwise expose to user
+  add a custom reshuffle action/button?
+  audit for any place which can't handle stations being added dynamically
+    maybe this means removing loadStations()
+
+theme and layout tweaks
+  properly style everything
+  different layouts for sideways or large screens?
+    show playlist and player side by side?
+    show sidebar with actions?
+  don't allow newlines in exittext prefs
+  better ui on player screen
+    single play/pause button
+    make text look better
+    proper margins
+    progress bar and time code
+    unload/reload button?
+  maybe use toolbar instead of system appbar?
+
+use station artwork
+  maybe when no queue loaded?
+  maybe in action menu, or station switch menu
+  maybe have a separate station recyclerview
+    controls to opt-in a station for downloading
+    number of songs downloaded
+
+better free space management
+  action to clear all or some stations
+  per-station download size management?
+
+menu item to quit program
+  maybe pref to quit on swipe if not playing
+
+
+
+non-core features for when above is complete:
+
+
+implement the new api in case this one disappears
+show station creation info, to allow station to be recreated
+multiple accounts?
+output routing to cast to other devices?
+
+android auto
+  https://developer.android.com/training/cars
+
+queued offline api calls
+  banning and loving
+    custom commands
+    https://developer.android.com/media/media3/session/control-playback#available-commands
+  tired
+  add, edit and removing stations
+  genre stations?
+
+rewrite as kmp with compose
+  audio:
+    interesting reference for KMP audio player: https://github.com/SEAbdulbasit/MusicApp-KMP
+      they also use the spotify api
+    korge audio is maybe the only KMP library: https://docs.korge.org/audio/
+    otherwise use different libraries with expect/actual
+  rewrite the UI in compose
+  sqlite room is kmp now apparently
+
+underlying search functionality in the media session
+  add SessionCommand.COMMAND_CODE_LIBRARY_SEARCH
+  implement MediaLibrarySession.Callback.onSearch
+  check for MediaItem.requestMetadata.searchQuery in onSetMediaItems
+
+add a separate interface for browsing on-device music
+  allow showing one station or all music
+  sorting/filtering by artist, album, song, other metadata in db?
+  show all song, album, artist metadata when song is poked
+  search visible
+  allow playing of individual songs
+    insert song into current playlist, after current song?
