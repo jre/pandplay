@@ -10,10 +10,6 @@ do the media session bits have debug logging I can enable?
   sometimes weird unreproducable things happen and logcat is useless
   maybe player.addAnalyticsListener ?
 
-adapt release builds to use a properties file instead of environment vars
-  https://developer.android.com/studio/publish/app-signing#secure_key
-  sign all builds so I can easily switch between release and dev
-
 rework sqlite with future DBs in mind
   use an abstract dao to eliminate local room datasource
     create separate daos for each data type
