@@ -4,7 +4,7 @@ on:
     tags:
       - 'v[0-9]+.*'
 jobs:
-  release-apk:
+  build-release-apk:
     uses: jre/github-stuff/.github/workflows/build-apk.yaml@v1
     permissions:
       contents: read
