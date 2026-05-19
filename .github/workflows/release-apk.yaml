@@ -33,7 +33,7 @@ jobs:
     needs: build-release-apk
     with:
       artifact-id: ${{ needs.build-release-apk.outputs.artifact-id }}
-      pages-repository: jre/test-page
+      pages-repository: jre/jre.github.io
       metadata-path: app/fdroid-metadata.yml
     secrets:
       pages-token: ${{ secrets.FDROID_PAGES_TOKEN }}
