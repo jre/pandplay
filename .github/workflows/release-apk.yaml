@@ -5,44 +5,35 @@ on:
       - 'v[0-9]+.*'
 jobs:
   release-apk:
-    runs-on: ubuntu-latest
+    uses: jre/github-stuff/.github/workflows/build-apk.yaml@v1
+    permissions:
+      contents: read
+    with:
+      gradle-task: assembleRelease
+      artifact-name: pandplay-${{ github.ref_name }}.apk
+      artifact-path: app/build/outputs/apk/release/pandplay-release.apk
+      key-alias: pandplay_signing
+    secrets:
+      keystore-base64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+      keystore-password: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
+
+  create-release:
+    uses: jre/github-stuff/.github/workflows/create-release.yaml@v1
+    needs: build-release-apk
     permissions:
       contents: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: zulu
-          java-version: 17
-          cache: gradle
-      - name: Set up keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-        run: |
-          ./.github/writeks.sh
-      - name: Build app
-        env:
-          RELEASE_KEYSTORE_PATH: ${{ github.workspace }}/keystore.jks
-          RELEASE_KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-        run: ./gradlew assembleRelease
-      - name: Create release
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          gh release create "${GITHUB_REF_NAME}" --generate-notes
-      - name: Upload apk artifact
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          mv app/build/outputs/apk/release/pandplay-release.apk \
-            "pandplay-${GITHUB_REF_NAME}.apk"
-          gh release upload "${GITHUB_REF_NAME}" \
-            "pandplay-${GITHUB_REF_NAME}.apk"
+    with:
+      release-tag: ${{ github.ref_name }}
+      artifact-id: ${{ needs.build-release-apk.outputs.artifact-id }}
+      artifact-name: pandplay-${{ github.ref_name }}.apk
+      artifact-days: 1
+
+  update-fdroid:
+    uses: jre/github-stuff/.github/workflows/add-fdroid-apk.yaml@v1
+    needs: build-release-apk
+    with:
+      artifact-id: ${{ needs.build-release-apk.outputs.artifact-id }}
+      pages-repository: jre/test-page
+      metadata-path: app/fdroid-metadata.yml
+    secrets:
+      pages-token: ${{ secrets.FDROID_PAGES_TOKEN }}

@@ -5,28 +5,14 @@ on:
       - main
 jobs:
   debug-apk:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: zulu
-          java-version: 17
-          cache: gradle
-      - name: Set up keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-        run: |
-          ./.github/writeks.sh
-      - name: Build app
-        run: ./gradlew assembleDebug
-      - name: Archive apk artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pandplay-debug
-          path: app/build/outputs/apk/debug/pandplay-debug.apk
+    uses: jre/github-stuff/.github/workflows/build-apk.yaml@v1
+    permissions:
+      contents: read
+    with:
+      gradle-task: assembleDebug
+      artifact-name: pandplay-debug-${{ github.sha }}.apk
+      artifact-path: app/build/outputs/apk/debug/pandplay-debug.apk
+      key-alias: pandplay_signing
+    secrets:
+      keystore-base64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+      keystore-password: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
