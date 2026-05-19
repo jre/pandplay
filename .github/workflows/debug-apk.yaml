@@ -10,7 +10,7 @@ jobs:
       contents: read
     with:
       gradle-task: assembleDebug
-      artifact-name: pandplay-debug-${{ github.sha }}.apk
+      artifact-name: pandplay-debug.apk
       artifact-path: app/build/outputs/apk/debug/pandplay-debug.apk
       key-alias: pandplay_signing
     secrets:
