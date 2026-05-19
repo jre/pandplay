@@ -12,6 +12,7 @@ jobs:
       gradle-task: assembleRelease
       artifact-name: pandplay-${{ github.ref_name }}.apk
       artifact-path: app/build/outputs/apk/release/pandplay-release.apk
+      artifact-days: 1
       key-alias: pandplay_signing
     secrets:
       keystore-base64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
@@ -26,7 +27,6 @@ jobs:
       release-tag: ${{ github.ref_name }}
       artifact-id: ${{ needs.build-release-apk.outputs.artifact-id }}
       artifact-name: pandplay-${{ github.ref_name }}.apk
-      artifact-days: 1
 
   update-fdroid:
     uses: jre/github-stuff/.github/workflows/add-fdroid-apk.yaml@v1
